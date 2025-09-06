@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Catálogo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .cart-badge {
+            animation: bounce 0.5s ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .cart-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .cart-sidebar.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Mi Catálogo</h1>
+                    <p class="text-gray-600 mt-1">Descubre nuestros productos</p>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Search Bar -->
+                    <div class="relative max-w-md w-full">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Buscar productos..." 
+                            class="search-input w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
+                        >
+                        <svg class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    
+                    <!-- Cart Button -->
+                    <button id="cartBtn" class="relative bg-gradient-to-r from-green-600 to-emerald-600 text-white p-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8"></path>
+                        </svg>
+                        <span id="cartBadge" class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Category Filters -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Categorías</h2>
+            <div class="flex flex-wrap gap-3">
+                <button class="category-btn active px-6 py-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-all font-medium" data-category="all">
+                    Todos
+                </button>
+                <button class="category-btn px-6 py-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-all font-medium" data-category="notebooks">
+                    Libretas y Agendas
+                </button>
+                <button class="category-btn px-6 py-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-all font-medium" data-category="restaurant">
+                    Catálogo para Restaurante
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Product Button -->
+        <div class="mb-8">
+            <button id="addProductBtn" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-medium shadow-lg hover:shadow-xl">
+                ➕ Agregar Producto
+            </button>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Los productos aparecerán aquí cuando los agregues -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No se encontraron productos</h3>
+            <p class="text-gray-600">Intenta con otros términos de búsqueda o categorías</p>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="cart-sidebar fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 flex flex-col">
+        <div class="p-6 border-b">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold">Mi Carrito</h2>
+                <button id="closeCartBtn" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+            <div id="emptyCart" class="text-center py-16">
+                <div class="text-6xl mb-4">🛒</div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Tu carrito está vacío</h3>
+                <p class="text-gray-600">Agrega productos para comenzar</p>
+            </div>
+        </div>
+        
+        <div id="cartFooter" class="hidden p-6 border-t bg-gray-50">
+            <div class="mb-4">
+                <div class="flex justify-between items-center text-lg font-semibold">
+                    <span>Total:</span>
+                    <span id="cartTotal">$0</span>
+                </div>
+            </div>
+            <button id="orderBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-medium shadow-lg">
+                📱 Enviar Pedido por WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4">Agregar Nuevo Producto</h3>
+            <form id="addProductForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del producto</label>
+                    <input type="text" id="productName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                    <textarea id="productDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" rows="3"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Precio</label>
+                    <input type="number" id="productPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                    <select id="productCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="notebooks">Libretas y Agendas</option>
+                        <option value="restaurant">Catálogo para Restaurante</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Emoji (opcional)</label>
+                    <input type="text" id="productEmoji" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="📱">
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Agregar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let cart = [];
+        let currentCategory = 'all';
+        const WHATSAPP_NUMBER = '4361005889'; // Cambia este número por el tuyo
+
+        // Category emojis
+        const categoryEmojis = {
+            notebooks: '📓',
+            restaurant: '🍽️'
+        };
+
+        // Category colors
+        const categoryColors = {
+            notebooks: 'from-purple-100 to-purple-200',
+            restaurant: 'from-orange-100 to-orange-200'
+        };
+
+        // DOM elements
+        const productsGrid = document.getElementById('productsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const addProductBtn = document.getElementById('addProductBtn');
+        const addProductModal = document.getElementById('addProductModal');
+        const addProductForm = document.getElementById('addProductForm');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const emptyState = document.getElementById('emptyState');
+        const cartBtn = document.getElementById('cartBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const cartItems = document.getElementById('cartItems');
+        const emptyCart = document.getElementById('emptyCart');
+        const cartFooter = document.getElementById('cartFooter');
+        const cartTotal = document.getElementById('cartTotal');
+        const orderBtn = document.getElementById('orderBtn');
+
+        // Initialize with empty products array
+        products = [];
+
+        // Render products
+        function renderProducts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredProducts = products.filter(product => {
+                const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                    product.description.toLowerCase().includes(searchTerm);
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            productsGrid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card bg-white rounded-2xl shadow-md overflow-hidden" data-category="${product.category}">
+                    <div class="h-48 bg-gradient-to-br ${categoryColors[product.category]} flex items-center justify-center">
+                        <span class="text-6xl">${product.emoji || categoryEmojis[product.category]}</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-gray-900 mb-2">${product.name}</h3>
+                        <p class="text-gray-600 text-sm mb-3">${product.description}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-bold text-blue-600">$${product.price}</span>
+                            <button class="add-to-cart-btn bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium" data-id="${product.id}">
+                                🛒 Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners to cart buttons
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = parseInt(btn.dataset.id);
+                    addToCart(productId);
+                });
+            });
+        }
+
+        // Category filter
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderProducts();
+            });
+        });
+
+        // Cart functions
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            updateCartUI();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartUI();
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                updateCartUI();
+            }
+        }
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Update badge
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            // Update cart content
+            if (cart.length === 0) {
+                emptyCart.classList.remove('hidden');
+                cartFooter.classList.add('hidden');
+                cartItems.innerHTML = `
+                    <div id="emptyCart" class="text-center py-16">
+                        <div class="text-6xl mb-4">🛒</div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Tu carrito está vacío</h3>
+                        <p class="text-gray-600">Agrega productos para comenzar</p>
+                    </div>
+                `;
+            } else {
+                emptyCart.classList.add('hidden');
+                cartFooter.classList.remove('hidden');
+                cartTotal.textContent = `$${totalPrice.toFixed(2)}`;
+                
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="flex items-center gap-4 p-4 border-b">
+                        <div class="w-16 h-16 bg-gradient-to-br ${categoryColors[item.category]} rounded-lg flex items-center justify-center">
+                            <span class="text-2xl">${item.emoji || categoryEmojis[item.category]}</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900">${item.name}</h4>
+                            <p class="text-sm text-gray-600">$${item.price}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="quantity-btn w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <span class="w-8 text-center font-semibold">${item.quantity}</span>
+                            <button class="quantity-btn w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        </div>
+                        <button class="text-red-500 hover:text-red-700 ml-2" onclick="removeFromCart(${item.id})">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function sendWhatsAppOrder() {
+            if (cart.length === 0) return;
+
+            const orderText = cart.map(item => 
+                `• ${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`
+            ).join('\n');
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const message = `🛒 *Nuevo Pedido*\n\n${orderText}\n\n💰 *Total: $${total.toFixed(2)}*\n\n¡Gracias por tu pedido!`;
+            
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Cart event listeners
+        cartBtn.addEventListener('click', () => {
+            cartSidebar.classList.add('open');
+            cartOverlay.classList.remove('hidden');
+        });
+
+        closeCartBtn.addEventListener('click', () => {
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.add('hidden');
+        });
+
+        cartOverlay.addEventListener('click', () => {
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.add('hidden');
+        });
+
+        orderBtn.addEventListener('click', sendWhatsAppOrder);
+
+        // Search functionality
+        searchInput.addEventListener('input', renderProducts);
+
+        // Modal functionality
+        addProductBtn.addEventListener('click', () => {
+            addProductModal.classList.remove('hidden');
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            addProductModal.classList.add('hidden');
+            addProductForm.reset();
+        });
+
+        // Add product
+        addProductForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newProduct = {
+                id: Date.now(),
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                emoji: document.getElementById('productEmoji').value || categoryEmojis[document.getElementById('productCategory').value]
+            };
+
+            products.push(newProduct);
+            renderProducts();
+            addProductModal.classList.add('hidden');
+            addProductForm.reset();
+        });
+
+        // Close modal on outside click
+        addProductModal.addEventListener('click', (e) => {
+            if (e.target === addProductModal) {
+                addProductModal.classList.add('hidden');
+                addProductForm.reset();
+            }
+        });
+
+        // Initial render
+        renderProducts();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b15c3c866014af',t:'MTc1NzE5NzI5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
