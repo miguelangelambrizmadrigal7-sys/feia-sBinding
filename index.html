@@ -3,418 +3,822 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feia's_Blinding - Catálogo</title>
+    <title>Eventos de Rifas - Sistema Público</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Poppins', sans-serif; }
         
-        .product-card {
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+        
+        .card-hover {
             transition: all 0.3s ease;
         }
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
         
-        .category-btn.active {
-            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        .roulette-animation {
+            animation: spin 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
-        .cart-badge {
-            animation: bounce 0.6s ease-in-out;
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(1800deg) scale(1.1); }
+            100% { transform: rotate(3600deg) scale(1); }
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-            60% { transform: translateY(-4px); }
+        .winner-announcement {
+            animation: celebration 1s ease-in-out;
         }
         
-        .cart-sidebar {
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .cart-sidebar.open {
-            transform: translateX(0);
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05) rotate(-2deg); }
+            75% { transform: scale(1.05) rotate(2deg); }
         }
         
-        .hero-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8B5CF6 100%);
+        .participant-item {
+            animation: slideIn 0.3s ease-out;
         }
         
-        .product-image {
-            transition: transform 0.3s ease;
-        }
-        .product-card:hover .product-image {
-            transform: scale(1.05);
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
-        .h2 {
-            text-align: center;
-            color: #4B5563; /* Gray-700 */
-            margin-top: 20px;
+        .modal {
+            backdrop-filter: blur(10px);
         }
         
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f39c12;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .status-upcoming { background: #dbeafe; color: #1e40af; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-finished { background: #f3f4f6; color: #374151; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="hero-gradient text-white shadow-2xl">
+    <header class="gradient-bg text-white shadow-2xl">
         <div class="max-w-7xl mx-auto px-4 py-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div class="text-center md:text-left">
-                    <h1 class="text-4xl md:text-5xl font-bold mb-2">Feia's_Blinding</h1>
-                    <p class="text-xl opacity-90">Libretas, Agendas y Catálogos para Restaurantes echos a mano</p>
-                    <p class="text-lg opacity-75 mt-2">Calidad premium para tu negocio</p>
+                    <h1 class="text-4xl md:text-6xl font-bold mb-4">🎲 Eventos de Rifas</h1>
+                    <p class="text-xl md:text-2xl opacity-90">Participa en nuestros sorteos exclusivos</p>
+                    <p class="text-lg opacity-75 mt-2">¡Grandes premios te esperan!</p>
                 </div>
                 
                 <div class="flex items-center justify-center gap-4">
-                    <!-- Cart Button -->
-                    <button id="cartBtn" class="relative bg-white/20 backdrop-blur-sm text-white p-4 rounded-2xl hover:bg-white/30 transition-all shadow-lg border border-white/20">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8"></path>
-                        </svg>
-                        <span id="cartBadge" class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-sm rounded-full h-7 w-7 flex items-center justify-center font-semibold hidden">0</span>
+                    <button id="adminBtn" class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-semibold border border-white/20">
+                        🔐 Administrador
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-4 py-12">
-        <!-- Category Filters -->
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Nuestros Productos</h2>
-            <div class="flex flex-wrap justify-center gap-4">
-                <button class="category-btn active px-8 py-3 rounded-full border-2 border-purple-200 bg-white hover:border-purple-300 transition-all font-semibold text-lg" data-category="all">
-                    🌟 Todos los Productos
-                </button>
-                <button class="category-btn px-8 py-3 rounded-full border-2 border-purple-200 bg-white hover:border-purple-300 transition-all font-semibold text-lg" data-category="notebooks">
-                    📓 Libretas y Agendas
-                </button>
-                <button class="category-btn px-8 py-3 rounded-full border-2 border-purple-200 bg-white hover:border-purple-300 transition-all font-semibold text-lg" data-category="restaurant">
-                    🍽️ Catálogos para Restaurante
-                </button>
+    <!-- Admin Panel (Hidden by default) -->
+    <div id="adminPanel" class="hidden bg-white shadow-lg border-b">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <span class="text-green-600 font-semibold">✅ Modo Administrador Activo</span>
+                </div>
+                <div class="flex gap-3">
+                    <button id="createEventBtn" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-semibold">
+                        ➕ Crear Evento
+                    </button>
+                    <button id="logoutBtn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-all font-semibold">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <!-- Products Grid -->
-        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <!-- Los productos se cargarán aquí -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-20">
-            <div class="text-8xl mb-6">🔍</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">No hay productos en esta categoría</h3>
-            <p class="text-gray-600 text-lg">Selecciona otra categoría para ver más productos</p>
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div id="cartSidebar" class="cart-sidebar fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
-        <div class="hero-gradient text-white p-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold">Mi Pedido</h2>
-                <button id="closeCartBtn" class="text-white/80 hover:text-white p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Events Grid -->
+        <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Events will be loaded here -->
         </div>
-        
-        <div id="cartItems" class="flex-1 overflow-y-auto p-6">
-            <div id="emptyCart" class="text-center py-20">
-                <div class="text-6xl mb-4">🛒</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h3>
-                <p class="text-gray-600">Agrega productos para comenzar tu pedido</p>
-            </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-20">
+            <div class="text-8xl mb-6">🎪</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">No hay eventos disponibles</h3>
+            <p class="text-gray-600 text-lg">Los eventos aparecerán aquí cuando estén disponibles</p>
         </div>
-        
-        <div id="cartFooter" class="hidden p-6 border-t bg-gray-50">
-            <div class="mb-6">
-                <div class="flex justify-between items-center text-2xl font-bold text-gray-900">
-                    <span>Total:</span>
-                    <span id="cartTotal" class="text-purple-600">$0.00</span>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/50 modal flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6 text-center">🔐 Acceso Administrador</h3>
+            <form id="loginForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña</label>
+                        <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="Ingresa la contraseña" required>
+                    </div>
                 </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" id="cancelLoginBtn" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold">
+                        Ingresar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit Event Modal -->
+    <div id="eventModal" class="hidden fixed inset-0 bg-black/50 modal flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 id="eventModalTitle" class="text-2xl font-bold mb-6 text-center">➕ Crear Nuevo Evento</h3>
+            <form id="eventForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🎪 Nombre del Evento</label>
+                        <input type="text" id="eventNameInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="Ej: Rifa de Año Nuevo" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🏆 Premio</label>
+                        <input type="text" id="eventPrizeInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="Ej: iPhone 15 Pro, $1000, Viaje..." required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha del Sorteo</label>
+                        <input type="datetime-local" id="eventDateInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Descripción</label>
+                        <textarea id="eventDescInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 h-24" placeholder="Describe el evento y sus reglas..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">📊 Estado</label>
+                        <select id="eventStatusInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500">
+                            <option value="upcoming">📅 Próximo</option>
+                            <option value="active">🔴 Activo (Aceptando participantes)</option>
+                            <option value="finished">✅ Finalizado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" id="cancelEventBtn" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold">
+                        Guardar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="eventDetailsModal" class="hidden fixed inset-0 bg-black/50 modal flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div id="eventDetailsContent">
+                <!-- Content will be loaded here -->
             </div>
-            <button id="orderBtn" class="w-full hero-gradient text-white py-4 rounded-2xl hover:shadow-lg transition-all font-bold text-lg">
-                📱 Hacer Pedido por WhatsApp
+        </div>
+    </div>
+
+    <!-- Participate Modal -->
+    <div id="participateModal" class="hidden fixed inset-0 bg-black/50 modal flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-6 text-center">🎯 Participar en Rifa</h3>
+            <form id="participateForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Tu Nombre</label>
+                        <input type="text" id="participantNameInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="Ingresa tu nombre completo" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">📧 Email (opcional)</label>
+                        <input type="email" id="participantEmailInput" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500" placeholder="tu@email.com">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" id="cancelParticipateBtn" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-xl hover:from-green-700 hover:to-teal-700 transition-all font-semibold">
+                        🎲 Participar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div id="winnerModal" class="hidden fixed inset-0 bg-black/50 modal flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md text-center winner-announcement">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-3xl font-bold mb-4 text-purple-600">¡GANADOR!</h3>
+            <div class="text-2xl font-bold text-gray-900 mb-2" id="winnerName"></div>
+            <div class="text-lg text-gray-600 mb-6" id="winnerPrize"></div>
+            <button id="closeWinnerBtn" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold">
+                ¡Felicidades! 🎊
             </button>
         </div>
     </div>
 
-    <!-- Cart Overlay -->
-    <div id="cartOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-
     <script>
-        // Productos predefinidos - AQUÍ AGREGAS TUS PRODUCTOS
-        const products = [
-            // Libretas y Agendas
-            {
-                id: 1,
-                name: "Agenda 2026",
-                image: "c://escritorio/libretas/images/agenda2026.png",
-                price: 24.99,
-                category: "agendas"
-            },
-            {
-                id: 2,
-                name: "Agenda Planificadora 2026",
-                image: "images/agenda1.png",
-                price: 32.50,
-                category: "agendas"
-            },
-            {
-                id: 3,
-                name: "Cuaderno Raya",
-                image: "images/cuaderno1.png",
-                price: 18.75,
-                category: "libretas"
-            },
-            
-            
-            {
-                id: 4,
-                name: "cuaderno punteado",
-                image: "images/libreta1.png",
-                price: 45.00,
-                category: "libretas"
-            },
-            {
-                id: 5,
-                name: "cuaderno liso",
-                image: "images/libretas1.png",
-                price: 38.99,
-                category: "libretas"
-            },
-     
-            // Catálogos para Restaurante
+        let events = [];
+        let isAdmin = false;
+        let currentEventId = null;
+        let editingEventId = null;
+        const ADMIN_PASSWORD = 'CHORIZO';
 
-            {
-                id: 6,
-                name: "Menú Infantil Colorido",
-                image: "images/menu_infantil1.png",
-                price: 29.99,
-                category: "restaurant"
-            },
-            {
-                id: 7,
-                name: "Catálogo de Postres Gourmet",
-                image: "images/postres1.png",
-                price: 34.50,
-                category: "restaurant"
-            }
-        ];
-
-        let cart = [];
-        let currentCategory = 'all';
-        const WHATSAPP_NUMBER = '4361005889'; // CAMBIA ESTE NÚMERO POR EL TUYO
-
-        // Funciones para guardar y cargar datos
-        function saveCart() {
-            localStorage.setItem('feias_cart', JSON.stringify(cart));
-        }
-
-        function loadCart() {
-            const savedCart = localStorage.getItem('feias_cart');
-            if (savedCart) {
-                cart = JSON.parse(savedCart);
-                updateCartUI();
+        // Load data from localStorage
+        function loadData() {
+            const savedEvents = localStorage.getItem('raffle_events');
+            if (savedEvents) {
+                events = JSON.parse(savedEvents);
             }
         }
 
-        // DOM elements
-        const productsGrid = document.getElementById('productsGrid');
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('raffle_events', JSON.stringify(events));
+        }
+
+        // DOM Elements
+        const adminBtn = document.getElementById('adminBtn');
+        const adminPanel = document.getElementById('adminPanel');
+        const createEventBtn = document.getElementById('createEventBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const eventsGrid = document.getElementById('eventsGrid');
         const emptyState = document.getElementById('emptyState');
-        const cartBtn = document.getElementById('cartBtn');
-        const cartBadge = document.getElementById('cartBadge');
-        const cartSidebar = document.getElementById('cartSidebar');
-        const cartOverlay = document.getElementById('cartOverlay');
-        const closeCartBtn = document.getElementById('closeCartBtn');
-        const cartItems = document.getElementById('cartItems');
-        const emptyCart = document.getElementById('emptyCart');
-        const cartFooter = document.getElementById('cartFooter');
-        const cartTotal = document.getElementById('cartTotal');
-        const orderBtn = document.getElementById('orderBtn');
+        
+        // Modals
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('passwordInput');
+        const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+        
+        const eventModal = document.getElementById('eventModal');
+        const eventModalTitle = document.getElementById('eventModalTitle');
+        const eventForm = document.getElementById('eventForm');
+        const cancelEventBtn = document.getElementById('cancelEventBtn');
+        
+        const eventDetailsModal = document.getElementById('eventDetailsModal');
+        const eventDetailsContent = document.getElementById('eventDetailsContent');
+        
+        const participateModal = document.getElementById('participateModal');
+        const participateForm = document.getElementById('participateForm');
+        const cancelParticipateBtn = document.getElementById('cancelParticipateBtn');
+        
+        const winnerModal = document.getElementById('winnerModal');
+        const winnerName = document.getElementById('winnerName');
+        const winnerPrize = document.getElementById('winnerPrize');
+        const closeWinnerBtn = document.getElementById('closeWinnerBtn');
 
-        // Render products
-        function renderProducts() {
-            const filteredProducts = products.filter(product => {
-                return currentCategory === 'all' || product.category === currentCategory;
-            });
+        // Initialize with sample events if empty
+        function initializeSampleEvents() {
+            if (events.length === 0) {
+                events = [
+                    {
+                        id: 1,
+                        name: "Rifa de Año Nuevo 2024",
+                        prize: "iPhone 15 Pro + AirPods Pro",
+                        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        description: "¡Celebra el año nuevo con nosotros! Participa por increíbles premios tecnológicos.",
+                        status: "active",
+                        participants: [],
+                        winner: null,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        name: "Sorteo Especial San Valentín",
+                        prize: "Cena romántica para 2 + $500",
+                        date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                        description: "El amor está en el aire. Participa con tu pareja por una noche inolvidable.",
+                        status: "upcoming",
+                        participants: [],
+                        winner: null,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveData();
+            }
+        }
 
-            if (filteredProducts.length === 0) {
-                productsGrid.innerHTML = '';
+        // Get event status info
+        function getEventStatusInfo(event) {
+            const now = new Date();
+            const eventDate = new Date(event.date);
+            
+            if (event.status === 'finished' || event.winner) {
+                return { status: 'finished', label: '✅ Finalizado', class: 'status-finished' };
+            } else if (event.status === 'active') {
+                return { status: 'active', label: '🔴 Activo', class: 'status-active' };
+            } else {
+                return { status: 'upcoming', label: '📅 Próximo', class: 'status-upcoming' };
+            }
+        }
+
+        // Render events
+        function renderEvents() {
+            if (events.length === 0) {
+                eventsGrid.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            productsGrid.innerHTML = filteredProducts.map(product => `
-                <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="aspect-square overflow-hidden">
-                        <img src="${product.image}" alt="${product.name}" class="product-image w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="font-bold text-xl text-gray-900 mb-2">${product.name}</h3>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-3xl font-bold text-purple-600">$${product.price.toFixed(2)}</span>
+            
+            eventsGrid.innerHTML = events.map(event => {
+                const statusInfo = getEventStatusInfo(event);
+                const eventDate = new Date(event.date);
+                
+                return `
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <h3 class="font-bold text-xl text-gray-900 flex-1">${event.name}</h3>
+                                ${isAdmin ? `
+                                    <div class="flex gap-2 ml-4">
+                                        <button onclick="editEvent(${event.id})" class="text-blue-600 hover:text-blue-800 p-1">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button onclick="deleteEvent(${event.id})" class="text-red-600 hover:text-red-800 p-1">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <span class="status-badge ${statusInfo.class}">${statusInfo.label}</span>
+                            </div>
+                            
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center gap-2 text-gray-700">
+                                    <span class="text-lg">🏆</span>
+                                    <span class="font-semibold">${event.prize}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <span class="text-lg">📅</span>
+                                    <span>${eventDate.toLocaleDateString('es-ES', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <span class="text-lg">👥</span>
+                                    <span>${event.participants.length} participante${event.participants.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                ${event.winner ? `
+                                    <div class="flex items-center gap-2 text-green-600 font-semibold">
+                                        <span class="text-lg">🎉</span>
+                                        <span>Ganador: ${event.winner.name}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <button onclick="viewEventDetails(${event.id})" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-all font-semibold">
+                                    👁️ Ver Detalles
+                                </button>
+                                ${statusInfo.status === 'active' && !event.winner ? `
+                                    <button onclick="participateInEvent(${event.id})" class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl hover:from-green-700 hover:to-teal-700 transition-all font-semibold">
+                                        🎯 Participar
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
-                        <button class="order-btn w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all font-bold text-lg shadow-lg hover:shadow-xl" data-id="${product.id}">
-                            🛒 Ordenar
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Add event listeners to order buttons
-            document.querySelectorAll('.order-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const productId = parseInt(btn.dataset.id);
-                    addToCart(productId);
-                });
-            });
-        }
-
-        // Category filter
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentCategory = btn.dataset.category;
-                renderProducts();
-            });
-        });
-
-        // Cart functions
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1 });
-            }
-            
-            updateCartUI();
-            saveCart(); // Guardar automáticamente
-        }
-
-        function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId);
-            updateCartUI();
-            saveCart(); // Guardar automáticamente
-        }
-
-        function updateQuantity(productId, newQuantity) {
-            if (newQuantity <= 0) {
-                removeFromCart(productId);
-                return;
-            }
-            
-            const item = cart.find(item => item.id === productId);
-            if (item) {
-                item.quantity = newQuantity;
-                updateCartUI();
-                saveCart(); // Guardar automáticamente
-            }
-        }
-
-        function updateCartUI() {
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            // Update badge
-            if (totalItems > 0) {
-                cartBadge.textContent = totalItems;
-                cartBadge.classList.remove('hidden');
-            } else {
-                cartBadge.classList.add('hidden');
-            }
-
-            // Update cart content
-            if (cart.length === 0) {
-                emptyCart.classList.remove('hidden');
-                cartFooter.classList.add('hidden');
-                cartItems.innerHTML = `
-                    <div id="emptyCart" class="text-center py-20">
-                        <div class="text-6xl mb-4">🛒</div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h3>
-                        <p class="text-gray-600">Agrega productos para comenzar tu pedido</p>
                     </div>
                 `;
+            }).join('');
+        }
+
+        // Admin functions
+        function showLogin() {
+            loginModal.classList.remove('hidden');
+            passwordInput.focus();
+        }
+
+        function hideLogin() {
+            loginModal.classList.add('hidden');
+            passwordInput.value = '';
+        }
+
+        function login(password) {
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                adminPanel.classList.remove('hidden');
+                hideLogin();
+                renderEvents();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            isAdmin = false;
+            adminPanel.classList.add('hidden');
+            renderEvents();
+        }
+
+        // Event management
+        function showEventModal(eventId = null) {
+            editingEventId = eventId;
+            
+            if (eventId) {
+                const event = events.find(e => e.id === eventId);
+                if (event) {
+                    eventModalTitle.textContent = '✏️ Editar Evento';
+                    document.getElementById('eventNameInput').value = event.name;
+                    document.getElementById('eventPrizeInput').value = event.prize;
+                    document.getElementById('eventDateInput').value = new Date(event.date).toISOString().slice(0, 16);
+                    document.getElementById('eventDescInput').value = event.description || '';
+                    document.getElementById('eventStatusInput').value = event.status;
+                }
             } else {
-                emptyCart.classList.add('hidden');
-                cartFooter.classList.remove('hidden');
-                cartTotal.textContent = `$${totalPrice.toFixed(2)}`;
-                
-                cartItems.innerHTML = cart.map(item => `
-                    <div class="flex items-center gap-4 p-4 border-b border-gray-100">
-                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-xl">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-gray-900">${item.name}</h4>
-                            <p class="text-purple-600 font-semibold">$${item.price.toFixed(2)}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                            <span class="w-8 text-center font-bold text-lg">${item.quantity}</span>
-                            <button class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center font-bold" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
-                        </div>
-                        <button class="text-red-500 hover:text-red-700 p-2" onclick="removeFromCart(${item.id})">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `).join('');
+                eventModalTitle.textContent = '➕ Crear Nuevo Evento';
+                eventForm.reset();
+                // Set default date to tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('eventDateInput').value = tomorrow.toISOString().slice(0, 16);
+            }
+            
+            eventModal.classList.remove('hidden');
+        }
+
+        function hideEventModal() {
+            eventModal.classList.add('hidden');
+            editingEventId = null;
+        }
+
+        function saveEvent(eventData) {
+            if (editingEventId) {
+                // Edit existing event
+                const eventIndex = events.findIndex(e => e.id === editingEventId);
+                if (eventIndex !== -1) {
+                    events[eventIndex] = { ...events[eventIndex], ...eventData };
+                }
+            } else {
+                // Create new event
+                const newEvent = {
+                    id: Date.now(),
+                    ...eventData,
+                    participants: [],
+                    winner: null,
+                    createdAt: new Date().toISOString()
+                };
+                events.unshift(newEvent);
+            }
+            
+            saveData();
+            renderEvents();
+            hideEventModal();
+        }
+
+        function editEvent(eventId) {
+            showEventModal(eventId);
+        }
+
+        function deleteEvent(eventId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+                events = events.filter(e => e.id !== eventId);
+                saveData();
+                renderEvents();
             }
         }
 
-        function sendWhatsAppOrder() {
-            if (cart.length === 0) return;
-
-            const orderText = cart.map(item => 
-                `• ${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`
-            ).join('\n');
+        // Event details
+        function viewEventDetails(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
             
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const message = `🛒 *NUEVO PEDIDO - Feia's_Blinding*\n\n${orderText}\n\n💰 *TOTAL: $${total.toFixed(2)}*\n\n¡Gracias por elegir Feia's_Blinding!\n\n_Por favor confirme disponibilidad y tiempo de entrega._`;
+            const statusInfo = getEventStatusInfo(event);
+            const eventDate = new Date(event.date);
             
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
+            eventDetailsContent.innerHTML = `
+                <div class="flex items-start justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 flex-1">${event.name}</h3>
+                    <button onclick="hideEventDetails()" class="text-gray-500 hover:text-gray-700 p-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <span class="status-badge ${statusInfo.class}">${statusInfo.label}</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🏆</span>
+                                <div>
+                                    <p class="text-sm text-gray-600">Premio</p>
+                                    <p class="font-bold text-lg">${event.prize}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">📅</span>
+                                <div>
+                                    <p class="text-sm text-gray-600">Fecha del sorteo</p>
+                                    <p class="font-semibold">${eventDate.toLocaleDateString('es-ES', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">👥</span>
+                                <div>
+                                    <p class="text-sm text-gray-600">Participantes</p>
+                                    <p class="font-semibold">${event.participants.length} registrado${event.participants.length !== 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            ${event.description ? `
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-900 mb-2">📝 Descripción</h4>
+                                    <p class="text-gray-700 whitespace-pre-wrap">${event.description}</p>
+                                </div>
+                            ` : ''}
+                            
+                            ${event.winner ? `
+                                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                                    <h4 class="font-semibold text-green-800 mb-2">🎉 Ganador</h4>
+                                    <p class="text-green-700 font-bold text-lg">${event.winner.name}</p>
+                                    <p class="text-green-600 text-sm">Ganó el ${new Date(event.winner.date).toLocaleDateString('es-ES')}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${event.participants.length > 0 ? `
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">👥 Lista de Participantes</h4>
+                            <div class="bg-gray-50 rounded-xl p-4 max-h-60 overflow-y-auto">
+                                <div class="space-y-2">
+                                    ${event.participants.map((participant, index) => `
+                                        <div class="flex items-center justify-between p-2 bg-white rounded-lg">
+                                            <div class="flex items-center gap-3">
+                                                <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-sm">
+                                                    ${index + 1}
+                                                </span>
+                                                <span class="font-medium">${participant.name}</span>
+                                            </div>
+                                            ${isAdmin ? `
+                                                <button onclick="removeParticipant(${event.id}, ${participant.id})" class="text-red-500 hover:text-red-700 p-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex gap-3 pt-4 border-t">
+                        ${statusInfo.status === 'active' && !event.winner ? `
+                            <button onclick="participateInEvent(${event.id}); hideEventDetails();" class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl hover:from-green-700 hover:to-teal-700 transition-all font-semibold">
+                                🎯 Participar en Rifa
+                            </button>
+                        ` : ''}
+                        
+                        ${isAdmin && statusInfo.status === 'active' && event.participants.length >= 2 && !event.winner ? `
+                            <button onclick="drawWinner(${event.id}); hideEventDetails();" class="flex-1 bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-xl hover:from-red-700 hover:to-pink-700 transition-all font-semibold">
+                                🎲 Realizar Sorteo
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            eventDetailsModal.classList.remove('hidden');
         }
 
-        // Cart event listeners
-        cartBtn.addEventListener('click', () => {
-            cartSidebar.classList.add('open');
-            cartOverlay.classList.remove('hidden');
+        function hideEventDetails() {
+            eventDetailsModal.classList.add('hidden');
+        }
+
+        // Participation
+        function participateInEvent(eventId) {
+            currentEventId = eventId;
+            participateModal.classList.remove('hidden');
+            document.getElementById('participantNameInput').focus();
+        }
+
+        function hideParticipateModal() {
+            participateModal.classList.add('hidden');
+            currentEventId = null;
+        }
+
+        function addParticipant(eventId, participantData) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return false;
+            
+            // Check if participant already exists
+            const existingParticipant = event.participants.find(p => 
+                p.name.toLowerCase() === participantData.name.toLowerCase() ||
+                (participantData.email && p.email && p.email.toLowerCase() === participantData.email.toLowerCase())
+            );
+            
+            if (existingParticipant) {
+                alert('Ya estás registrado en esta rifa');
+                return false;
+            }
+            
+            const participant = {
+                id: Date.now(),
+                ...participantData,
+                registeredAt: new Date().toISOString()
+            };
+            
+            event.participants.push(participant);
+            saveData();
+            renderEvents();
+            hideParticipateModal();
+            
+            alert('¡Te has registrado exitosamente en la rifa!');
+            return true;
+        }
+
+        function removeParticipant(eventId, participantId) {
+            if (!isAdmin) return;
+            
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            event.participants = event.participants.filter(p => p.id !== participantId);
+            saveData();
+            viewEventDetails(eventId); // Refresh the details view
+        }
+
+        // Winner selection
+        function drawWinner(eventId) {
+            if (!isAdmin) return;
+            
+            const event = events.find(e => e.id === eventId);
+            if (!event || event.participants.length < 2) return;
+            
+            // Animate the draw
+            const randomIndex = Math.floor(Math.random() * event.participants.length);
+            const winner = event.participants[randomIndex];
+            
+            event.winner = {
+                ...winner,
+                date: new Date().toISOString()
+            };
+            event.status = 'finished';
+            
+            // Show winner modal
+            winnerName.textContent = winner.name;
+            winnerPrize.textContent = `Ha ganado: ${event.prize}`;
+            winnerModal.classList.remove('hidden');
+            
+            // Create confetti
+            createConfetti();
+            
+            saveData();
+            renderEvents();
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+
+        // Event listeners
+        adminBtn.addEventListener('click', showLogin);
+        logoutBtn.addEventListener('click', logout);
+        createEventBtn.addEventListener('click', () => showEventModal());
+
+        // Login form
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = passwordInput.value;
+            if (!login(password)) {
+                alert('Contraseña incorrecta');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         });
 
-        closeCartBtn.addEventListener('click', () => {
-            cartSidebar.classList.remove('open');
-            cartOverlay.classList.add('hidden');
+        cancelLoginBtn.addEventListener('click', hideLogin);
+
+        // Event form
+        eventForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(eventForm);
+            const eventData = {
+                name: document.getElementById('eventNameInput').value,
+                prize: document.getElementById('eventPrizeInput').value,
+                date: document.getElementById('eventDateInput').value,
+                description: document.getElementById('eventDescInput').value,
+                status: document.getElementById('eventStatusInput').value
+            };
+            saveEvent(eventData);
         });
 
-        cartOverlay.addEventListener('click', () => {
-            cartSidebar.classList.remove('open');
-            cartOverlay.classList.add('hidden');
+        cancelEventBtn.addEventListener('click', hideEventModal);
+
+        // Participate form
+        participateForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!currentEventId) return;
+            
+            const participantData = {
+                name: document.getElementById('participantNameInput').value.trim(),
+                email: document.getElementById('participantEmailInput').value.trim()
+            };
+            
+            addParticipant(currentEventId, participantData);
         });
 
-        orderBtn.addEventListener('click', sendWhatsAppOrder);
+        cancelParticipateBtn.addEventListener('click', hideParticipateModal);
 
-        // Cargar datos guardados y renderizar
-        loadCart(); // Cargar carrito guardado
-        renderProducts();
+        // Winner modal
+        closeWinnerBtn.addEventListener('click', () => {
+            winnerModal.classList.add('hidden');
+        });
+
+        // Close modals on outside click
+        [loginModal, eventModal, eventDetailsModal, participateModal, winnerModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                    if (modal === participateModal) currentEventId = null;
+                    if (modal === eventModal) editingEventId = null;
+                }
+            });
+        });
+
+        // Initialize
+        loadData();
+        initializeSampleEvents();
+        renderEvents();
     </script>
-    <h1>metodos de pago: <br>PayPal, Mercado Pago, Transferencia bancaria, Efectivo, Tarjeta de crédito y débito.</h1>
-
-    <h2>pagina creada por Miguel Ángel Ambriz Madrigal <br> contacto: miguelxced@gmail.com</h2>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b36410f78814af',t:'MTc1NzIxODU4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b3e95355aa14af',t:'MTc1NzIyNDA0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
